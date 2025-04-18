@@ -14,38 +14,34 @@ const server = require('../server');
 chai.use(chaiHttp);
 
 suite('Functional Tests', function() {
-
-  /*
-  * ----[EXAMPLE TEST]----
-  * Each test should completely test the response of the API end-point including response status code!
-  */
-  test('#example Test GET /api/books', function(done){
-     chai.request(server)
-      .get('/api/books')
-      .end(function(err, res){
-        assert.equal(res.status, 200);
-        assert.isArray(res.body, 'response should be an array');
-        assert.property(res.body[0], 'commentcount', 'Books in array should contain commentcount');
-        assert.property(res.body[0], 'title', 'Books in array should contain title');
-        assert.property(res.body[0], '_id', 'Books in array should contain _id');
-        done();
-      });
-  });
-  /*
-  * ----[END of EXAMPLE TEST]----
-  */
-
   suite('Routing tests', function() {
 
-
     suite('POST /api/books with title => create book object/expect book object', function() {
-      
+      const titleTest = "LOTR";
+
       test('Test POST /api/books with title', function(done) {
-        //done();
+
+        chai.request(server)
+        .post('/api/books')
+        .send(titleTest)
+        .end(function(err, res){
+          assert.equal(res.status, 200);
+          assert.isObject(res.body, 'Test1: response should be an object');
+          assert.property(res.body, 'title', 'Test1: title is missing');
+          assert.equal(res.body.title, titleTest, 'Test1: title is wrong');
+          assert.property(res.body, '_id', 'Book should contain _id');
+          done();
+        });
       });
       
       test('Test POST /api/books with no title given', function(done) {
-        //done();
+        chai.request(server)
+        .post('/api/books')
+        .end(function(err, res){
+          assert.equal(res.status, 400);
+          assert.equal(res.text, 'missing required field title', 'Test2: wrong response');
+          done();
+        });
       });
       
     });
