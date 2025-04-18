@@ -49,6 +49,15 @@ module.exports = function (app) {
         //if successful response will be 'delete successful'
       });
 
+      //Query route for delete test
+      app.get('/api/books/:id/exists', function(req, res) {
+        BookModel.findById(req.params.id, function(err, book) {
+          if (err) return res.status(500).send(err);
+          if (book) return res.status(200).send(true);
+          else return res.status(404).send(false);
+        });
+      });
+
   }).catch(err => {
     console.error('MongoSB connection error', err);
   });
