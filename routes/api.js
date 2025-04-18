@@ -1,19 +1,19 @@
 'use strict';
 const mongoose = require('mongoose');
 
+//Create Schema
+const Schema = mongoose.Schema;
+const bookSchema = new Schema({
+  title: { type: String, required: true },
+  comments: [String]
+});
+const BookModel = mongoose.model('BookModel', bookSchema);
+
 module.exports = function (app) {
 
   //Connect to Database
   mongoose.connect(process.env.DB).then(() => {
     console.log("Connected to MongoDB");
-
-    //Create Schema
-    const Schema = mongoose.Schema;
-    const bookSchema = new Schema({
-      title: { type: String, required: true },
-      comments: [String]
-    });
-    const BookModel = mongoose.model('BookModel', bookSchema);
 
     app.route('/api/books')
       .get(function (req, res){
