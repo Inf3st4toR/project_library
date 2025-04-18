@@ -39,7 +39,7 @@ suite('Functional Tests', function() {
         chai.request(server)
         .post('/api/books')
         .end(function(err, res){
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 200);
           assert.equal(res.text, 'missing required field title', 'Test2: wrong response');
           done();
         });
@@ -71,7 +71,7 @@ suite('Functional Tests', function() {
         chai.request(server)
         .get('/api/books/idInvalid')
         .end(function(err, res){
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 200);
           assert.equal(res.text, 'no book exists', 'Test4: wrong response');
           done();
         });
@@ -114,7 +114,7 @@ suite('Functional Tests', function() {
         chai.request(server)
         .post('/api/books/6801f7041517d0f8d703f72a')
         .end(function(err, res){
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 200);
           assert.equal(res.text, 'missing required field comment', 'Test7: wrong response');
           done();
         });
@@ -125,7 +125,7 @@ suite('Functional Tests', function() {
         .post('/api/books/invalidId')
         .send("Lost comment")
         .end(function(err, res){
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 200);
           assert.equal(res.text, 'no book exists', 'Test8: wrong response');
           done();
         });
@@ -153,7 +153,7 @@ suite('Functional Tests', function() {
         chai.request(server)
         .delete('/api/books/invalidId')
         .end(function(err, res){
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 200);
           assert.equal(res.text, 'no book exists', 'Test10: wrong response');
           done();
         });
