@@ -9,83 +9,80 @@ const bookSchema = new Schema({
 });
 const BookModel = mongoose.model('BookModel', bookSchema);
 
+
+//Connect to Database
+mongoose.connect(process.env.DB)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err =>console.error("MongoDB connection error" + err));
+
 module.exports = function (app) {
 
-  //Connect to Database
-  mongoose.connect(process.env.DB).then(() => {
-    console.log("Connected to MongoDB");
+  app.route('/api/books')
+    .get(function (req, res){
+      BookModel.find({})
+      .then(array => {
+        array.forEach(book => {
+          book.commentcount = book.comments.length;
+          delete book.comments;
+        });
+        res.send(array);
+      });
+    })
+    
+    .post(function (req, res){
+      const title = req.body.title;
+      if (!title) return res.send("missing required field title");
+      BookModel.create({ title, comments: [] })
+      .then(book => {
+        console.log(book);
+        res.send({ _id: book._id, title: book.title });
+      }).catch(err => res.status(500).send("database error" + err));
+    })
+    
+    .delete(function(req, res){
+      BookModel.deleteMany({})
+      .then(result => {
+        res.send("complete delete successful");
+      });
+    });
 
-    app.route('/api/books')
-      .get(function (req, res){
-        BookModel.find({})
-        .then(array => {
-          array.forEach(book => {
-            book.commentcount = book.comments.length;
-            delete book.comments;
-          });
-          res.send(array);
-        });
-      })
-      
-      .post(function (req, res){
-        const newBook = { title: req.body.title, comments: [] };
-        BookModel.create(newBook)
-        .then(book => {
-          newBook._id = book._id;
-          console.log(newBook);
-          res.send(newBook);
-        });
-      })
-      
-      .delete(function(req, res){
-        BookModel.deleteMany({})
-        .then(result => {
-          res.send("complete delete successful");
+  app.route('/api/books/:id')
+    .get(function (req, res){
+      BookModel.findById(req.params.id)
+      .then(book => {
+        if (!book) return res.send("no book exists");
+        console.log(book);
+        res.send(book);
+      });
+    })
+    
+    .post(function(req, res){
+      if (!req.body.comment) return res.send("missing required field comment");
+      BookModel.findById(req.params.id)
+      .then(book => {
+        if (!book) return res.send("no book exists");
+        book.comments.push(req.body.comment)
+        book.save().then(upBook => {
+          console.log(upBook);
+          res.send(upBook);
         });
       });
-
-
-    app.route('/api/books/:id')
-      .get(function (req, res){
-        BookModel.findById(req.params.id)
-        .then(book => {
-          if (!book) return res.send("no book exists");
-          console.log(book);
-          res.send(book);
-        });
-      })
-      
-      .post(function(req, res){
-        if (!req.body.comment) return res.send("missing required field comment");
-        BookModel.findById(req.params.id)
-        .then(book => {
-          if (!book) return res.send("no book exists");
-          book.comments.push(req.body.comment)
-          book.save().then(upBook => {
-            console.log(upBook);
-            res.send(upBook);
-          });
-        });
-      })
-      
-      .delete(function(req, res){
-        BookModel.findByIdAndDelete(req.params.id)
-        .then(deletedBook => {
-          if (!deletedBook) return res.send("no book exists");
-          res.send("delete successful");
-        });
+    })
+    
+    .delete(function(req, res){
+      BookModel.findByIdAndDelete(req.params.id)
+      .then(deletedBook => {
+        if (!deletedBook) return res.send("no book exists");
+        res.send("delete successful");
       });
+    });
 
-      //Query route for delete test
-      app.get('/api/books/:id/exists', function(req, res) {
-        BookModel.findById(req.params.id, function(err, book) {
-          if (err) return res.status(500).send(err);
-          if (book) return res.status(200).send(true);
-          else return res.status(404).send(false);
-        });
+    //Query route for delete test
+    app.get('/api/books/:id/exists', function(req, res) {
+      BookModel.findById(req.params.id, function(err, book) {
+        if (err) return res.status(500).send(err);
+        if (book) return res.status(200).send(true);
+        else return res.status(404).send(false);
       });
-
-  }).catch(err => {
-    console.error('MongoSB connection error', err);
-  });
-};
+    });
+}
