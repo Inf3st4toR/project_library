@@ -60,7 +60,9 @@ module.exports = function (app) {
   
   .post(function(req, res){
     if (!req.body.comment) return res.send("missing required field comment");
-    BookModel.findById(req.params.id)
+    const id = req.params.id;
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.send("no book exists");
+    BookModel.findById(id)
     .then(book => {
       if (!book) return res.send("no book exists");
       book.comments.push(req.body.comment)
@@ -71,7 +73,9 @@ module.exports = function (app) {
   })
   
   .delete(function(req, res){
-    BookModel.findByIdAndDelete(req.params.id)
+    const id = req.params.id;
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.send("no book exists");
+    BookModel.findByIdAndDelete(id)
     .then(deletedBook => {
       if (!deletedBook) return res.send("no book exists");
       res.send("delete successful");
