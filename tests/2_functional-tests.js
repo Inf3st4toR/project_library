@@ -23,12 +23,12 @@ suite('Functional Tests', function() {
       test('Test POST /api/books with title', function(done) {
         chai.request(server)
         .post('/api/books')
-        .send("Test1 Book")
+        .send({ title: "Test1 Book" })
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.isObject(res.body, 'Test1: response should be an object');
           assert.property(res.body, 'title', 'Test1: title is missing');
-          assert.equal(res.body.title, titleTest, 'Test1: title is wrong');
+          assert.equal(res.body.title, "Test1 Book", 'Test1: title is wrong');
           assert.property(res.body, '_id', 'Book should contain _id');
           bookId = res.body._id;
           done();
@@ -79,7 +79,7 @@ suite('Functional Tests', function() {
       
       test('Test GET /api/books/[id] with valid id in db',  function(done){
         chai.request(server)
-        .get('/api/books/6801f7041517d0f8d703f72a')
+        .get('/api/books/' + bookId)
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.isObject(res.body, 'Test5: response should be an object');
@@ -97,8 +97,8 @@ suite('Functional Tests', function() {
       
       test('Test POST /api/books/[id] with comment', function(done){
         chai.request(server)
-        .post('/api/books/6801f7041517d0f8d703f72a')
-        .send("Book is meh")
+        .post('/api/books/' + bookId)
+        .send({comment: "Book is meh"})
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.isObject(res.body, 'Test6: response should be an object');
@@ -112,7 +112,7 @@ suite('Functional Tests', function() {
 
       test('Test POST /api/books/[id] without comment field', function(done){
         chai.request(server)
-        .post('/api/books/6801f7041517d0f8d703f72a')
+        .post('/api/books/' + bookId)
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.equal(res.text, 'missing required field comment', 'Test7: wrong response');
@@ -123,7 +123,7 @@ suite('Functional Tests', function() {
       test('Test POST /api/books/[id] with comment, id not in db', function(done){
         chai.request(server)
         .post('/api/books/invalidId')
-        .send("Lost comment")
+        .send({ comment: "Lost comment" })
         .end(function(err, res){
           assert.equal(res.status, 200);
           assert.equal(res.text, 'no book exists', 'Test8: wrong response');

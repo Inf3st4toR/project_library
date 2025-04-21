@@ -21,21 +21,23 @@ module.exports = function (app) {
     .get(function (req, res){
       BookModel.find({})
       .then(array => {
-        array.forEach(book => {
-          book.commentcount = book.comments.length;
-          delete book.comments;
-        });
-        res.send(array);
+        const result = array.map(book => {
+          const obj = book.toObject();
+          obj.commentcount = obj.comments.length;
+          delete obj.comments;
+          return obj;
+        })
+        res.send(result);
       });
     })
     
     .post(function (req, res){
       const title = req.body.title;
       if (!title) return res.send("missing required field title");
-      BookModel.create({ title, comments: [] })
+      BookModel.create({ title: title, comments: [] })
       .then(book => {
         console.log(book);
-        res.send({ _id: book._id, title: book.title });
+        res.send({ _id: book._id.toString(), title: book.title });
       }).catch(err => res.status(500).send("database error" + err));
     })
     
